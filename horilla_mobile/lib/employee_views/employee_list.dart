@@ -82,7 +82,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
     var employeeId = prefs.getInt("employee_id");
-    var uri = Uri.parse('$typedServerUrl/employees/$employeeId/');
+    var uri = Uri.parse('$typedServerUrl/employees/$employeeId');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
