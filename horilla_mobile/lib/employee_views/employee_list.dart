@@ -281,7 +281,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     final queryParameters = {
       'page': currentPage.toString(),
       'search': searchText,
-    };    var uri = Uri.parse('$typedServerUrl/list/employees/').replace(queryParameters: queryParameters);
+    };    var uri = Uri.parse('$typedServerUrl/list/employees/').replace(queryParameters: queryParameters);    
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
