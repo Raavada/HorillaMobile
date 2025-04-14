@@ -82,7 +82,7 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
     var employeeId = prefs.getInt("employee_id");
-    var uri = Uri.parse('$typedServerUrl/api/employee/employees/$employeeId');
+    var uri = Uri.parse('$typedServerUrl/employees/$employeeId/');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
@@ -132,8 +132,10 @@ class _EmployeeListPageState extends State<EmployeeListPage> {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
-    var uri = Uri.parse(
-        '$typedServerUrl/api/employee/list/employees?page=$currentPage&search=$searchText');
+    final queryParameters = {
+      'page': currentPage.toString(),
+      'search': searchText,
+    };    var uri = Uri.parse('$typedServerUrl/list/employees/').replace(queryParameters: queryParameters);
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",

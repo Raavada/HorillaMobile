@@ -118,8 +118,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
     var uri =
-        Uri.parse('$typedServerUrl/api/attendance/permission-check/attendance');
-    var response = await http.get(uri, headers: {
+        Uri.parse('$typedServerUrl/api/base/permission-check/attendance/');    var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
     });
@@ -135,7 +134,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     var employeeId = prefs.getInt("employee_id");
     var typedServerUrl = prefs.getString("typed_url");
     var uri = Uri.parse(
-        '$typedServerUrl/api/base/rotating-shift-create-permission-check/$employeeId');
+        '$typedServerUrl/api/base/rotating-worktype-assign-create-permission-check/$employeeId');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
@@ -175,7 +174,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
     var employeeId = prefs.getInt("employee_id");
-    var uri = Uri.parse('$typedServerUrl/api/employee/employees/$employeeId');
+    var uri = Uri.parse('$typedServerUrl/api/employees/$employeeId/');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
@@ -222,7 +221,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     });
     if (currentPage != 0) {
       var uri = Uri.parse(
-          '$typedServerUrl/api/base/individual-rotating-worktypes?employee_id=$employeeId&page=$currentPage&search=$searchText');
+          '$typedServerUrl/api/base/individual-rotating-worktype-assigns?employee_id=$employeeId&page=$currentPage&search=$searchText');
       var response = await http.get(uri, headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -262,7 +261,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     } else {
       currentPage = 1;
       var uri = Uri.parse(
-          '$typedServerUrl/api/base/rotating-worktype-assigns?employee_id=$employeeId&search=$searchText');
+          '$typedServerUrl/api/base/individual-rotating-worktype-assigns?employee_id=$employeeId&search=$searchText');
       var response = await http.get(uri, headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -309,7 +308,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     var typedServerUrl = prefs.getString("typed_url");
     for (var page = 1;; page++) {
       var uri = Uri.parse(
-          '$typedServerUrl/api/employee/employee-selector?page=$page');
+          '$typedServerUrl/api/employee-selector/?page=$page');
       var response = await http.get(uri, headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -373,7 +372,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
-    var uri = Uri.parse('$typedServerUrl/api/base/worktypes');
+    var uri = Uri.parse('$typedServerUrl/api/worktypes/');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
@@ -396,7 +395,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
-    var uri = Uri.parse('$typedServerUrl/api/base/rotating-worktypes');
+    var uri = Uri.parse('$typedServerUrl/api/rotating-worktype/');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
@@ -420,7 +419,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
-    var uri = Uri.parse('$typedServerUrl/api/employee/employees/$employeeId');
+    var uri = Uri.parse('$typedServerUrl/api/employees/$employeeId/');
     var response = await http.get(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
@@ -442,8 +441,8 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
     String rotatingWorkTypeId = updatedDetails['id'].toString();
-    var uri = Uri.parse(
-        '$typedServerUrl/api/base/rotating-worktype-assigns/$rotatingWorkTypeId/');
+    var uri = Uri.parse('$typedServerUrl/api/rotating-worktype-assigns/$rotatingWorkTypeId/');
+
     var response = await http.put(
       uri,
       headers: {
@@ -500,7 +499,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
-    var uri = Uri.parse('$typedServerUrl/api/base/rotating-worktype-assigns/');
+    var uri = Uri.parse('$typedServerUrl/api/rotating-worktype-assigns/');
     var response = await http.post(
       uri,
       headers: {
@@ -691,8 +690,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
     var typedServerUrl = prefs.getString("typed_url");
-    var uri = Uri.parse(
-        '$typedServerUrl/api/base/rotating-worktype-assigns/$requestId/');
+    var uri = Uri.parse('$typedServerUrl/api/rotating-worktype-assigns/$requestId/');
     var response = await http.delete(uri, headers: {
       "Content-Type": "application/json",
       "Authorization": "Bearer $token",
