@@ -1,6 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+
+class RotatingWorkTypeForm {
+  Future<Map<String, dynamic>?> createRotatingWorkType(Map<String, dynamic> data) async {
+    return null;
+  }
+  Future<Map<String, dynamic>?> updateRotatingWorkType(int shiftId, Map<String, dynamic> data) async {
+    return null;
+  }
+  Future<void> deleteRotatingWorkType(int requestId) async {
+  }
+}
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -71,6 +82,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
   int maxCount = 5;
   var employeeItems = [''];
   Map<String, String> requestedWorkTypeIdMap = {};
+  final RotatingWorkTypeForm rotatingWorkTypeForm = RotatingWorkTypeForm();
   Map<String, dynamic> employeeDetails = {};
   Map<String, String> workTypeIdMap = {};
   Map<String, String> employeeIdMap = {};
@@ -435,7 +447,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
   }
 
   /// Updates the details of a rotating work type.
-  Future<void> updateRotatingWorkType(
+  Future<void> updateRotatingWorkTypeRequest(
       Map<String, dynamic> updatedDetails) async {
     final prefs = await SharedPreferences.getInstance();
     var token = prefs.getString("token");
@@ -489,6 +501,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
         _errorMessage = responseData['employee_id'].join('\n');
         setState(() {});
       }
+      print(responseData);
       setState(() {});
     }
   }
@@ -542,7 +555,6 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
         _errorMessage = responseData['rotate_after_day'].join('\n');
         setState(() {});
       }
-      if (responseData.containsKey('employee_id')) {
         _errorMessage = responseData['employee_id'].join('\n');
         setState(() {});
       }
@@ -693,7 +705,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
     var uri = Uri.parse('$typedServerUrl/api/rotating-worktype-assigns/$requestId/');
     var response = await http.delete(uri, headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer $token",
+      "Authorization":"Bearer $token",
     });
     if (response.statusCode == 200) {
       setState(() {
@@ -1068,7 +1080,7 @@ class _RotatingWorkTypePageState extends State<RotatingWorkTypePage> {
                               "based_on": selectedBasedOnValue,
                               "rotate_after_day": rotateDayController.text,
                             };
-                            await updateRotatingWorkType(updatedDetails);
+                            await updateRotatingWorkTypeRequest(updatedDetails);
                             setState(() {
                               isAction = false;
                             });

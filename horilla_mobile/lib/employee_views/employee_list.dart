@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,29 @@ class EmployeeListPage extends StatefulWidget {
   _EmployeeListPageState createState() => _EmployeeListPageState();
 }
 
+class _EmployeeListPageState extends State<EmployeeListPage> {
+  List<Map<String, dynamic>> _employees = [];
+  bool _isLoading = true;
+  bool _hasError = false;
+  String _errorMessage = '';
+  String _searchText = '';
+  bool _hasMore = true;
+  int _currentPage = 1;
+  final int _pageSize = 10;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchEmployees();
+    _scrollController.addListener(_scrollListener);
+  }
+  const EmployeeListPage({super.key});
+
+  @override
+  _EmployeeListPageState createState() => _EmployeeListPageState();
+}
+
 class StateInfo {
   final Color color;
   final String displayString;
@@ -21,6 +45,128 @@ class StateInfo {
 }
 
 class _EmployeeListPageState extends State<EmployeeListPage> {
+  Future<void> _fetchEmployees() async {
+    if (!_hasMore || _isLoading) return;
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final typedServerUrl = prefs.getString('typed_url');
+    final String url =
+        '$typedServerUrl/list/employees/?page=$_currentPage&search=$_searchText';
+
+    try {
+      final response = await http.get(Uri.parse(url), headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        setState(() {
+          _employees.addAll(List<Map<String, dynamic>>.from(data['results']));
+          _hasMore = data['next'] != null;
+          if (_hasMore) {
+            _currentPage++;
+          }
+        });
+      } else {
+        setState(() {
+          _hasError = true;
+          _errorMessage =
+              'Failed to load employees: ${response.statusCode}';
+        });
+      }
+    } catch (error) {
+      setState(() {
+        _hasError = true;
+        _errorMessage = 'An error occurred: $error';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels ==
+        _scrollController.position.maxScrollExtent) {
+      _fetchEmployees();
+    }
+  }
+
+  Future<void> _refreshEmployees() async {
+    setState(() {
+      _currentPage = 1;
+      _employees.clear();
+      _hasMore = true;
+      _isLoading = true;
+    });
+    await _fetchEmployees();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildEmployeeList() {
+    if (_isLoading && _employees.isEmpty) {
+      return _buildShimmerLoading();
+    }
+
+    if (_hasError) {
+      return Center(child: Text(_errorMessage));
+    }
+
+    if (_employees.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search,
+              color: Colors.black,
+              size: 92,
+            ),
+            SizedBox(height: 20),
+            Text(
+              "There are no employee records to display",
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshEmployees,
+      child: ListView.builder(
+        controller: _scrollController,
+        itemCount: _hasMore ? _employees.length + 1 : _employees.length,
+        itemBuilder: (context, index) {
+          if (index == _employees.length) {
+            return _buildLoadingIndicator();
+          }
+          final employee = _employees[index];
+          return _buildEmployeeListItem(employee);
+        },
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> requests = [];
+  String searchText = '';
+
   List<Map<String, dynamic>> requests = [];
   String searchText = '';
   List<dynamic> filteredRecords = [];
@@ -611,6 +757,119 @@ class Home extends StatelessWidget {
     return Container(
       color: Colors.white,
       child: const Center(child: Text('Page 1')),
+  Widget _buildShimmerLoading() {
+    return Column(
+      children: [
+        const SizedBox(height: 5),
+        Padding(
+          padding: MediaQuery.of(context).size.width > 600
+              ? const EdgeInsets.all(20.0)
+              : const EdgeInsets.all(15.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Card(
+                  margin: const EdgeInsets.all(8),
+                  elevation: 0,
+                  child: Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextField(
+                        enabled: false,
+                        decoration: InputDecoration(
+                          hintText: 'Loading...',
+                          hintStyle:
+                              TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                            borderSide: BorderSide.none,
+                          ),
+                          prefixIcon: Transform.scale(
+                            scale: 0.8,
+                            child:
+                                Icon(Icons.search, color: Colors.grey.shade400),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12.0, horizontal: 4.0),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: 6,
+              itemBuilder: (context, index) {
+                return Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Container(
+                        height: 20,
+                        color: Colors.grey[300],
+                      ),
+                      subtitle: Container(
+                        height: 16,
+                        color: Colors.grey[200],
+                        margin: const EdgeInsets.only(top: 8.0),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: LoadingAnimationWidget.bouncingBall(
+          size: 25,
+          color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmployeeListItem(Map<String, dynamic> employee) {
+    // Implement your employee list item rendering here
+    return ListTile(
+      title: Text(employee['employee_first_name'] +
+          ' ' +
+          (employee['employee_last_name'] ?? '')),
+      subtitle: Text(employee['email'] ?? ''),
+      // ... other UI components
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Employees'),
+      ),
+      body: _buildEmployeeList(),
     );
   }
 }
